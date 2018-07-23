@@ -199,7 +199,12 @@ class Seq2SeqAttentionModel(object):
         self._dec_in_state = fw_state
         # During decoding, follow up _dec_in_state are fed from beam_search.
         # dec_out_state are stored by beam_search for next step feeding.
-        initial_state_attention = (hps.mode == 'decode')
+        # Temporoary fix for training and decode time diffrence behaviour issue.
+        # Possible better fix is use tf.cond() for initial_state_attention inside seq2seq.py or
+        # make two graphs here for first timestep prediction and rest timesteps
+        # because the first timestep attention should initalize by Zeros Ideally
+        # TODO : Modefy this code with a Proper Fix
+        initial_state_attention = True #(hps.mode == 'decode')
         decoder_outputs, self._dec_out_state = tf.contrib.legacy_seq2seq.attention_decoder(
             emb_decoder_inputs, self._dec_in_state, self._enc_top_states,
             cell, num_heads=1, loop_function=loop_function,
